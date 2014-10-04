@@ -1,7 +1,5 @@
 <?php
 
-//require 'libraries/exception.php';
-
 class Router {
 
     private $controller;
@@ -15,12 +13,19 @@ class Router {
     private $match = 0;
     private $paramList = Array();
     private $paramArray = Array();
-
     private $keys = null;
     private $currentUrl;
-
-
-    private $haveParams =0;
+    private $defaultRoute = 1;
+    private $haveParams = 0;
+    private $c;
+    private $m;
+    private $acceptParams = Array();
+    private $currentRoute;
+    private $urlArray = Array();
+    private $currentController;
+    private $currentMethod;
+    private $currentParamList;
+    private $flag = 0;
                 function __construct() {
         $this->defaultController = DEFAULT_CONTROLLER;
         $this->defaultMethod = DEFAULT_METHOD;
@@ -31,7 +36,6 @@ class Router {
         if (isset($_GET['url'])) {
             $this->url = filter_var(rtrim($_GET['url'], '/'), FILTER_SANITIZE_URL);
             $this->url = explode('/', $this->url);
-            // print_r($this->url);
             self::getRoute();
         } else {
             self::loadDefaultController();
@@ -42,7 +46,6 @@ class Router {
         $this->routes[] = array("url" => "$getUrl", "controller" => "$getController", "method" => "$getMethod");
     }
 
-
     public function getRoute() {
 
         $matchUrl = null;
@@ -50,92 +53,185 @@ class Router {
             $matchUrl.="$newUrl" . "/";
         }
         $matchUrl = trim($matchUrl, "/");
-
-
-        //  echo "$matchUrl";
         $pattern = '/\{\d+\}/';
+        $this->currentUrl = $this->url;
 
-// $this->currentUrl = explode('/', $route['url']);
-        $this->currentUrl=  $this->url;
- 
+
+
+        foreach ($this->routes as $ro) {
+            $this->urlArray[] = $ro['url'];
+        }//no ndeed
+        //$nwUrl = implode("/", $this->url);
+        foreach ($this->routes as $ua) {
+            $a1 = explode("/", $ua['url']);
+            $b1 = preg_grep($pattern, $a1);
+            $b1_keys = array_keys($b1);
+            $tempUrl = $this->url;
+            foreach ($b1_keys as $k) {
+                $tempUrl[$k] = $a1[$k];
+            }
+            if ($tempUrl == $a1) {
+                $this->currentRoute = implode('/', $a1);
+                $this->currentController = $ua['controller'];
+                $this->currentMethod = $ua['method'];
+               // echo '<b><br/>'.$this->currentController.'</b><br/>';
+   
+            }
+        }
+
+//            foreach ($this->routes as $ro) {
+//            $this->urlArray[] = $ro['url'];
+//        }
+//        $nwUrl = implode("/", $this->url);
+//        foreach ($this->urlArray as $ua) {
+//            $a1 = explode("/", $ua);
+//            $b1 = preg_grep($pattern, $a1);
+//            $b1_keys = array_keys($b1);
+//            $tempUrl = $this->url;
+//            foreach ($b1_keys as $k) {
+//                $tempUrl[$k] = $a1[$k];
+//            }
+//            if ($tempUrl == $a1) {
+//                $this->currentRoute = implode('/', $a1);
+//                $this->currentController = $route['controller'];
+//                echo '<b><br/>'.$this->currentController.'</b><br/>';
+//            }
+//        }    
+//        
+//        
+        
+
 
         foreach ($this->routes as $route) {
             if (preg_match($pattern, $route['url'])) {
                 $this->paramArray = explode('/', $route['url']);
-               // $this->paramArrayList = explode('/', $route['url']);
                 $str = preg_replace($pattern, '', $route['url']);
                 $result = trim(str_replace('//', '/', $str), "/"); // replaced string
-//                echo '<br/>url:-';echo $route['url']; echo'<br/>';
-// print_r($this->url);
-//                echo'<br/>paramArray:-'; print_r($this->paramArray);echo'<br/>';
 
-                $temp = array_replace($this->paramArray,$this->url);
-                
-                
-
-//              echo '<br/>temp:-';print_r($temp); echo'<br/>';
-//               echo'<br/>method:-' . $route['method'] . '<br/>';
-//               echo'<br/>paramArray:-'; print_r($this->paramArray);echo'<br/>';
-//                echo'<br/>CURL:-'; print_r($this->currentUrl);echo'<br/>';
+                $temp = array_replace($this->paramArray, $this->url);
 
                 if ($temp == $this->currentUrl) {
-                   //     echo '<br/>condition ok <br/>';
+                    //   print_r($temp);
+                    //     echo '<br/>condition ok <br/>';
                     $result2 = preg_grep($pattern, $this->paramArray);
                     $this->keys = array_keys($result2);
-                    $c = $route['controller'];
-                    $m = $route['method'];
-                    $this->haveParams=1;
-                 //  break;
+                    $this->c = $route['controller'];
+                    $this->m = $route['method'];
+                    $this->haveParams = 1;
+                    //  break;
                 }
             }
-// match was here
         } // end of foreach
-        
+
 
         foreach ($this->routes as $route2) {
 
-            // echo $route['url'].'<br/>';
-            if ($matchUrl == $route2['url']) {
+            $temp2 = explode('/', $route2['url']);
+            $temp3 = array_replace($this->url, $temp2);
+            if ($temp2 == $temp3) {
                 $this->match = 1;
                 break;
             } else {
                 $this->match = 0;
-                
             }
         }
 
-
-
-    //    echo 'p' . $this->haveParams;
-
         if ($this->haveParams == 1) {
-         //   echo 'keys set';
             foreach ($this->keys as $key) {
                 $this->paramList[] = $this->url[$key];
             }
         }
-//        echo '<br/>paramList ';
-//        print_r($this->paramList);
-//        echo "<br/>";
 
         if ($this->match == 1) {
-           // echo 'match found';
-            $this->controller = $route2['controller'];
-            $this->method = $route2['method'];
-        } else {
-           // echo 'no matchfound';
-            if (isset($this->url[0])) {
-                $this->controller = $this->url[0];
+            $tempUrl = $this->url;
+            $sliceUrl = implode("/", $tempUrl);
+            foreach ($this->routes as $temp4) {
+                $a1 = explode("/", $temp4['url']);
+                $a2 = explode("/", $sliceUrl);
+                $b1 = preg_grep($pattern, $a1);
+                $b1_keys = array_keys($b1);
+                $b1_values = array_values($b1);
+                $tempUrl = $this->url;
+                foreach ($b1_keys as $k) {
+                    $tempUrl[$k] = $a1[$k];
+                }
+
+                if ($tempUrl == $a1) {
+                    //echo 'input url match with url given in router. not a default router';
+                    $this->defaultRoute = 0;
+                }
+            }
+            if ($this->defaultRoute == 1) {
+                // echo '<br/><b>Default router</b></br/>';
+                $this->haveParams = 0;
+                // echo '<b><br/> haveparams? '.$this->haveParams.'<br/></b>';
+
+                $this->keys = null;
+                if (isset($this->url[0])) {
+                    $this->controller = $this->url[0];
+                }
+
+                if (isset($this->url[1])) {
+                    $this->method = $this->url[1];
+                }
+                if ($this->keys != null) {
+                    $this->controller = $this->c;
+                    $this->method = $this->m;
+                }
+            } else {
+                $this->haveParams = 1;
+                //   echo '<br/><b>Not default router</b></br/>';
+                // echo '<b><br/> haveparams? '.$this->haveParams.'<br/></b>';
             }
 
-            if (isset($this->url[1])) {
-                $this->method = $this->url[1];
+            if ($this->haveParams == 1) {
+                $this->controller = $route2['controller'];
+                $this->method = $route2['method'];
+                if ($this->keys == null) {
+                    $this->controller = $route['controller'];
+                    $this->method = $route['method'];
+                }
             }
-            if ($this->keys != null) {
-                $this->controller = $c;
-                $this->method = $m;
-            }
+        } else {
+            echo 'no matchfound';
         }
+
+        if ($this->defaultRoute == 0 && $this->haveParams == 1) {
+         //   echo '<b><br/> No default router and haveParams<br/></b>';
+            foreach ($this->routes as $route) {
+                if (preg_match($pattern, $route['url'])) {
+                    $this->acceptParams[] = $route['url'];
+                }
+            }
+            foreach ($this->acceptParams as $param) {
+                if($param == $this->currentRoute)
+                {       
+                    $p = explode('/',$param);
+                    $r = preg_grep($pattern, $p);
+                    $this->ke = array_keys($r);
+                    //print_r($this->ke);
+                   // unset($this->paramList);
+                   // print_r($this->paramList);
+                   foreach ($this->ke as $key) {
+                      // echo $this->url[$key];
+                      $this->currentParamList[] = $this->url[$key];
+                   }
+             
+                    $this->controller = $this->currentController;
+                    $this->method = $this->currentMethod;
+                  //  $this->parameters = $this->currentParamList;
+                    $this->flag=1;
+                  //  echo '<b><br/> from acp'; print_r($this->parameters); echo'</b><br/>';
+                    //break;
+                }
+               // echo $param . '<br/>';
+            }
+          //  echo '<b><br/> currentRoute is ' . $this->currentRoute . '<br/></b>';
+           //   echo"this accept params";print_r($this->acceptParams);echo '<br/>';
+        }
+
+
+
 
 
         self::getParameters();
@@ -160,18 +256,18 @@ class Router {
             $this->parameters = $this->url;
             array_shift($this->parameters);
             array_shift($this->parameters);
-            // print_r($this->parameters);
         }
-        if($this->haveParams = 1)
+        if ($this->haveParams == 1) {
+            $this->parameters = $this->paramList;
+        }
+        if ($this->flag == 1)
         {
-            $this->parameters=  $this->paramList;
+            $this->parameters = $this->currentParamList;
         }
     }
 
     private function getController() {
 
-        // if (isset($this->url[0])) {
-        // $this->controller = $this->url[0];
         if (isset($this->controller)) {
 
             if (file_exists("controllers/$this->controller.php")) {
@@ -186,8 +282,7 @@ class Router {
     }
 
     private function getMethod() {
-        // if (isset($this->url[1])) {
-        //   $this->method = $this->url[1];
+
         if (isset($this->method)) {
 
             if (method_exists($this->controllerObject, $this->method)) {
@@ -195,10 +290,9 @@ class Router {
                 $reflection = new ReflectionMethod($this->controllerObject, $this->method);
                 $requiredParams = $reflection->getNumberOfParameters();
 
-//                echo "<b>expected params:- $requiredParams $this->method</b> <br/>";
-//                echo "<b>passing params:- ".  count($this->parameters)."</b> <br/>";
-               // echo print_r($this->parameters);
-                
+                echo "<b>expected params:- $requiredParams $this->method</b> <br/>";
+                echo "<b>passing params:- " . count($this->parameters) . "</b> <br/>";
+                echo print_r($this->parameters);
 
                 if (count($this->parameters) == $requiredParams) {
                     call_user_func_array(array($this->controllerObject, $this->method), $this->parameters);
