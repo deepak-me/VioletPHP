@@ -26,6 +26,9 @@ class Router {
     private $currentMethod;
     private $currentParamList;
     private $flag = 0;
+    private $basicController;
+    private $basicMethod;
+    private $found = 0;
                 function __construct() {
         $this->defaultController = DEFAULT_CONTROLLER;
         $this->defaultMethod = DEFAULT_METHOD;
@@ -74,32 +77,29 @@ class Router {
                 $this->currentRoute = implode('/', $a1);
                 $this->currentController = $ua['controller'];
                 $this->currentMethod = $ua['method'];
-               // echo '<b><br/>'.$this->currentController.'</b><br/>';
-   
+                // echo '<b><br/>'.$this->currentController.'</b><br/>';
             }
         }
 
-//            foreach ($this->routes as $ro) {
-//            $this->urlArray[] = $ro['url'];
+//        foreach ($this->routes as $rou) {
+//            $e1[] = preg_grep($pattern, $rou, PREG_GREP_INVERT);
 //        }
-//        $nwUrl = implode("/", $this->url);
-//        foreach ($this->urlArray as $ua) {
-//            $a1 = explode("/", $ua);
-//            $b1 = preg_grep($pattern, $a1);
-//            $b1_keys = array_keys($b1);
-//            $tempUrl = $this->url;
-//            foreach ($b1_keys as $k) {
-//                $tempUrl[$k] = $a1[$k];
+//        foreach ($e1 as $e) {
+//            if (isset($e['url'])) {
+//                $e2[] = $e['url'];
 //            }
-//            if ($tempUrl == $a1) {
-//                $this->currentRoute = implode('/', $a1);
-//                $this->currentController = $route['controller'];
-//                echo '<b><br/>'.$this->currentController.'</b><br/>';
-//            }
-//        }    
-//        
-//        
-        
+//        }   
+        $tempUrl = implode("/", $this->url);
+        foreach ($this->routes as $ro) {
+            if ($tempUrl == $ro['url']) {
+                $this->basicController=$ro['controller'];
+                $this->basicMethod=$ro['method'];
+                $this->found=1;
+               // echo '<b>cntrl' . $ro['controller'] . '</b><br/>';
+               // echo'insde';
+            }
+        }
+
 
 
         foreach ($this->routes as $route) {
@@ -197,39 +197,46 @@ class Router {
         }
 
         if ($this->defaultRoute == 0 && $this->haveParams == 1) {
-         //   echo '<b><br/> No default router and haveParams<br/></b>';
+            //   echo '<b><br/> No default router and haveParams<br/></b>';
             foreach ($this->routes as $route) {
                 if (preg_match($pattern, $route['url'])) {
                     $this->acceptParams[] = $route['url'];
                 }
             }
             foreach ($this->acceptParams as $param) {
-                if($param == $this->currentRoute)
-                {       
-                    $p = explode('/',$param);
+                if ($param == $this->currentRoute) {
+                    $p = explode('/', $param);
                     $r = preg_grep($pattern, $p);
                     $this->ke = array_keys($r);
                     //print_r($this->ke);
-                   // unset($this->paramList);
-                   // print_r($this->paramList);
-                   foreach ($this->ke as $key) {
-                      // echo $this->url[$key];
-                      $this->currentParamList[] = $this->url[$key];
-                   }
-             
+                    // unset($this->paramList);
+                    // print_r($this->paramList);
+                    foreach ($this->ke as $key) {
+                        // echo $this->url[$key];
+                        if(isset($this->url[$key]))
+                        {
+                           $this->currentParamList[] = $this->url[$key];
+                        }
+                    }
+
                     $this->controller = $this->currentController;
                     $this->method = $this->currentMethod;
-                  //  $this->parameters = $this->currentParamList;
-                    $this->flag=1;
-                  //  echo '<b><br/> from acp'; print_r($this->parameters); echo'</b><br/>';
+                    //  $this->parameters = $this->currentParamList;
+                    $this->flag = 1;
+                    //  echo '<b><br/> from acp'; print_r($this->parameters); echo'</b><br/>';
                     //break;
                 }
-               // echo $param . '<br/>';
+                // echo $param . '<br/>';
             }
-          //  echo '<b><br/> currentRoute is ' . $this->currentRoute . '<br/></b>';
-           //   echo"this accept params";print_r($this->acceptParams);echo '<br/>';
+            
+            if($this->found == 1)
+            {
+                $this->controller =  $this->basicController;
+                $this->method = $this->basicMethod;
+            }
+            //  echo '<b><br/> currentRoute is ' . $this->currentRoute . '<br/></b>';
+            //   echo"this accept params";print_r($this->acceptParams);echo '<br/>';
         }
-
 
 
 
@@ -260,8 +267,7 @@ class Router {
         if ($this->haveParams == 1) {
             $this->parameters = $this->paramList;
         }
-        if ($this->flag == 1)
-        {
+        if ($this->flag == 1) {
             $this->parameters = $this->currentParamList;
         }
     }
@@ -290,9 +296,9 @@ class Router {
                 $reflection = new ReflectionMethod($this->controllerObject, $this->method);
                 $requiredParams = $reflection->getNumberOfParameters();
 
-                echo "<b>expected params:- $requiredParams $this->method</b> <br/>";
-                echo "<b>passing params:- " . count($this->parameters) . "</b> <br/>";
-                echo print_r($this->parameters);
+//                echo "<b>expected params:- $requiredParams $this->method</b> <br/>";
+//                echo "<b>passing params:- " . count($this->parameters) . "</b> <br/>";
+//                echo print_r($this->parameters);
 
                 if (count($this->parameters) == $requiredParams) {
                     call_user_func_array(array($this->controllerObject, $this->method), $this->parameters);
