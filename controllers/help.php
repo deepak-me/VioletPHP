@@ -1,6 +1,6 @@
 <?php
 
-class Help extends VioletController {
+class Help extends Controller {
 
 //    function __construct() {
 //        parent::__construct();

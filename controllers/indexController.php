@@ -1,5 +1,5 @@
 <?php
-class indexController extends VioletController {
+class indexController extends Controller {
 
     function __construct() {
         
@@ -9,7 +9,7 @@ class indexController extends VioletController {
         //load model
         $indexObject = $this->LoadModel('indexModel');
         $this->var1 = $indexObject->functionOne();
-        $this->var2 = $indexObject->functionTwo($arg1 , $arg2);
+      //  $this->var2 = $indexObject->functionTwo($arg1 , $arg2);
         
         //load view
         $this->renderView('indexView');

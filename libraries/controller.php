@@ -1,18 +1,34 @@
 <?php
 
-class VioletController {
+class Controller {
 
+    public $view;
+    private $template;
+    private $getView;
+
+//public $defaultMethod;
     function __construct() {
-    //    echo "Inside violet controller(main)<br/>";
+        //    echo "Inside violet controller(main)<br/>";
+        //   $this->defaultMethod = "index";
     }
 
     function loadModel($model) {
-        require 'models/' . strtolower($model) . '.php';
+        require 'models/' . $model . '.php';
         return new $model();
     }
 
-    function renderView($view) {
-        require 'views/'.  strtolower($view).'.php';
+    function initView($view) {
+        $this->getView = $view;
+        $this->view = new Template('views/' . $view . '.php');
+
+    }
+
+    function renderView() {
+        if (TEMPLATE_ENGINE == 'on') {
+            $this->view->showVar($this->template);
+        } else {
+            require 'views/' . $this->getView . '.php';
+        }
     }
 
 //open databse , load model , load view [php files]
