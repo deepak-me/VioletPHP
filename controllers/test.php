@@ -4,7 +4,7 @@ class Test extends Controller {
 
     function __construct() {
         parent::__construct();
-        echo "we are inside test controller <br/>";
+       // echo "we are inside test controller <br/>";
     }
 
     public function index() {
@@ -15,7 +15,10 @@ class Test extends Controller {
         $this->t = $test_model->otherFunction();
 
         // load view
-        $this->renderView('testview');
+        $this->initView('testview');
+        $this->view->setVar('value',  $this->t);
+        $this->renderView();
+        //$this->renderView('testview');
     }
 
     public function f2() {
@@ -39,9 +42,12 @@ class Test extends Controller {
 
     public function tpl() {
         //load model   
-        $tpl_model = $this->loadModel('testTplModel');
-        $this->dataFromModel = $tpl_model->tplModelMethod();
-        $this->t = $tpl_model->testArray();
+       // $tpl_model = $this->loadModel('testTplModel');
+       // $this->dataFromModel = $tpl_model->tplModelMethod();
+       // $this->t = $tpl_model->testArray();
+        $this->loadModel('testTplModel');
+        $this->dataFromModel = $this->model->tplModelMethod();
+       // $this->tst = $this->model->testArray();
 
         // load views and template
         // variables are case sensitive
@@ -49,7 +55,9 @@ class Test extends Controller {
         $this->view->setVar('title', 'my title');
         $this->view->setVar('sample', 'sample content');
         $this->view->setVar('modelData', $this->dataFromModel);
-        $this->view->setVar('testArray', $this->t);
+        $this->view->setVar('testArray', $this->model->testArray());
+        $this->view->setVar('testArray1', $this->model->testArray1());
+        $this->view->setVar('testArray2', $this->model->testArray2());
         $this->renderView();
     }
 

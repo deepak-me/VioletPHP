@@ -5,6 +5,7 @@ class Controller {
     public $view;
     private $template;
     private $getView;
+    public $model;
 
 //public $defaultMethod;
     function __construct() {
@@ -14,7 +15,8 @@ class Controller {
 
     function loadModel($model) {
         require 'models/' . $model . '.php';
-        return new $model();
+       // return new $model();
+       $this->model = new $model;
     }
 
     function initView($view) {
@@ -25,7 +27,7 @@ class Controller {
 
     function renderView() {
         if (TEMPLATE_ENGINE == 'on') {
-            $this->view->showVar($this->template);
+            $this->view->processData($this->template);
         } else {
             require 'views/' . $this->getView . '.php';
         }

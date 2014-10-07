@@ -1,3 +1,8 @@
-<?php
-
-echo "<b>value: $this->t </b><br/>";
+<html>
+    <header>
+        
+    </header>
+    <body>   
+        This is the value: <b>{{value}}</b>
+    </body>
+</html>
