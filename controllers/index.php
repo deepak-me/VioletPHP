@@ -8,7 +8,8 @@ class Index extends Controller {
     public function index()
     {
         //load default view
-        $this->renderView('Index');
+        $this->initView('Index');
+        $this->renderView();
     }
 
 }

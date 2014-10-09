@@ -4,19 +4,19 @@ class Test extends Controller {
 
     function __construct() {
         parent::__construct();
-       // echo "we are inside test controller <br/>";
+        // echo "we are inside test controller <br/>";
     }
 
     public function index() {
         echo "message from index() of TestController<br/>";
 
         // load model
-        $test_model = $this->loadModel('TestModel');
-        $this->t = $test_model->otherFunction();
+        $this->loadModel('TestModel');
+        $this->t = $this->model->otherFunction();
 
         // load view
         $this->initView('testview');
-        $this->view->setVar('value',  $this->t);
+        $this->view->setVar('value', $this->t);
         $this->renderView();
         //$this->renderView('testview');
     }
@@ -42,22 +42,29 @@ class Test extends Controller {
 
     public function tpl() {
         //load model   
-       // $tpl_model = $this->loadModel('testTplModel');
-       // $this->dataFromModel = $tpl_model->tplModelMethod();
-       // $this->t = $tpl_model->testArray();
         $this->loadModel('testTplModel');
         $this->dataFromModel = $this->model->tplModelMethod();
-       // $this->tst = $this->model->testArray();
+
+        // set header
+        $this->initView('tplHeader');
+        $this->view->setVar('title', 'thi is my title');
+        $this->renderView();
 
         // load views and template
-        // variables are case sensitive
         $this->initView('testTplView');
-        $this->view->setVar('title', 'my title');
+        // set variables. variables are case sensitive
         $this->view->setVar('sample', 'sample content');
         $this->view->setVar('modelData', $this->dataFromModel);
         $this->view->setVar('testArray', $this->model->testArray());
         $this->view->setVar('testArray1', $this->model->testArray1());
         $this->view->setVar('testArray2', $this->model->testArray2());
+        $this->view->setVar('testArray3', $this->model->testArray3());
+        // render view
+        $this->renderView();
+
+        // set footer
+        $this->initView('tplFooter');
+        $this->view->setVar('footerVar', 'footer content');
         $this->renderView();
     }
 
