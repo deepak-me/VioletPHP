@@ -10,11 +10,12 @@ class Help extends Controller {
     public function myfunc($arg1, $arg2) {
         //  echo "Myfunc method from help controller <br/>";
         //load model
-        $help_model = $this->loadModel('HelpModel');
-        $this->sum_numbers = $help_model->computeSum($arg1, $arg2);
+        $this->loadModel('HelpModel');
+        $this->sum_numbers = $this->model->computeSum($arg1, $arg2);
 
         //load view
-        $this->renderView('HelpView');
+        $this->initView('HelpView');
+        $this->renderView();
     }
 
     public function func2() {
