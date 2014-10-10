@@ -7,35 +7,58 @@ class dbModel {
     }
 
     public function getDataFromDb() {
-      
+
         //new database connection
-         $db = new Database();
-
+        $db = new Database();
         //execute query
-       // $db->executeQuery("INSERT INTO cars(id,name,price) VALUES('9','maruti','5400')");
-       //$db->executeQuery("INSERT INTO test_table(name,email) VALUES('kumaran','kumaran@gmail.com')");
-      // $db->executeQuery("SELECT * FROM cars");
-       // $db->executeQuery("DELETE FROM test_table WHERE name='gfdg' OR name='tty' ");
-      //  $db->executeQuery("DELETE FROM test_table WHERE name='kumaran'");
-
+        // $db->executeQuery("INSERT INTO cars(id,name,price) VALUES('9','maruti','5400')");
+        //$db->executeQuery("INSERT INTO test_table(name,email) VALUES('kumaran','kumaran@gmail.com')");
+        //  $db->executeQuery("INSERT INTO fruits(name,color) VALUES('mango','orange')");
+        //  $db->executeQuery("DELETE FROM fruits WHERE color='violet'");
+        $db->executeQuery("SELECT * from COMPANY");
+        // $db->executeQuery("DELETE FROM test_table WHERE name='gfdg' OR name='tty' ");
+        //  $db->executeQuery("DELETE FROM test_table WHERE name='kumaran'");
         //return result array
-        // return $db->getAllRows(); // ok
-       // return $db->getRows(3,3); // ok
-       // return $db->getRowAt(2); // ok
-        //return $db->getRow(); // ok 
-       //  print_r($db->affectedRows()); //ok[not for select]
-        //return $db->count(); // ok
-       // print_r($db->lastInsertId()); // ok
-       /*
-        * to escape string
-        *  $email="kumaran@gmail.com";
-        *  $db->escapeString($email);
-        */
+        return $db->getAllRows(); // ok
+        // print_r ($db->getRows(1,3)); //ok
+        //  print_r($db->getRowAt(1)); // ok 
+        //  print_r ($db->getRow()); // return first row
+        // print_r($db->affectedRows());  // ok
+        //  print_r($db->count());  // ok
+        //  print_r($db->lastInsertId());  //ok
+        /*
+         * to escape string
+         *  $email="kumaran@gmail.com";
+         *  $db->escapeString($email);
+         */
     }
-
+  
+    public function dataSimpleArray()
+    {
+        $a = Array("orange","apple","grapes");
+        return $a;
+    }
+       public function dataKeyArray()
+    {
+        $a = Array("id"=>"10","name"=>"kumaran");
+        return $a;
+    }
     public function getDataFromDb2() {
 
-        $a = Array("country" => "india", "state" => "kerala", "district" => "kochi", "location" => "perumbavoor");
+        $a = NULL;
+        $a =100;
+//        if (isset($a)) {
+//            echo "set";
+//        } else {
+//            echo 'not set';
+//        }
+        return $a;
+    }
+    
+    public function getDataFromDb3() {
+
+        $a = NULL;
+        $a =100;
         return $a;
     }
 

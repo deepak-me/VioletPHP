@@ -9,8 +9,25 @@
             <input type="submit" name="submit" value="POST this"/>
         </form>
      -->       
-     {{loop}}
-     {{dbValue.id}} {{dbValue.name}} {{dbValue.price}} <br/>
-     {{/loop}}
+ {{keyArray.name}}
+
+<hr/>
+
+     {{isset:dbValue2}}
+      
+   {{loop}}{{dbValue.NAME}} {{dbValue.AGE}} <br/>{{/loop}}
+   
+        <hr/>
+      simple array <br/>
+      {{loop}}{{simpleArray}} {{/loop}} <br/>
+
+
+       {{/isset}}
+
+       
+      {{isset:dbValue3}}isset same line{{/isset}}
+     
+      
+       
     </body>
 </html>
