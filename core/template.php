@@ -1,9 +1,16 @@
 <?php
 
+/* * *********************************
+ * Template Engine for Violet PHP  *   
+ * Author : Deepak                 * 
+ * Date   : 10/10/2014             *
+ * ******************************** */
+
 class Template {
     /*
      * store template file
      */
+
     private $tpl;
     /*
      * store matches
@@ -45,17 +52,10 @@ class Template {
         }
     }
 
-    
-    function isAssoc($arr)
-{
-    return array_keys($arr) !== range(0, count($arr) - 1);
-}
-    
-    
-    
     /*
      * process the template
      */
+
     public function processTemplate() {
         /*
          * patterns for string, simple array, associative array, isset and loop
@@ -88,12 +88,11 @@ class Template {
                     $issetName = explode(":", $issetStack[0][1]);
                     $issetName = end($issetName);
                     if (isset($this->values[$issetName])) {
-                         $this->tpl = str_replace($setMatches[$i][0], $setMatches[$i][1], $this->tpl);
-                        
+                        $this->tpl = str_replace($setMatches[$i][0], $setMatches[$i][1], $this->tpl);
                     } else {
                         $this->tpl = str_replace($this->match, '', $this->tpl);
                     }
-                } 
+                }
             }
 
 
@@ -122,19 +121,18 @@ class Template {
                             foreach ($this->values["$arrayName"] as $key => $value) {
                                 if (!is_array($value)) {
 
-                                    $this->loopLine = str_replace('{{' . $arrayName . '.' . $key . '}}', $value, $this->loopLine);   
+                                    $this->loopLine = str_replace('{{' . $arrayName . '.' . $key . '}}', $value, $this->loopLine);
                                 }
                             }
                             /*
                              * append each values to loopLine
                              */
-                             $this->loopString .= $this->loopLine;
+                            $this->loopString .= $this->loopLine;
                             /*
                              * update template file with replaced values
                              */
-                             $this->tpl = str_replace($this->match, $this->loopString, $this->tpl);
+                            $this->tpl = str_replace($this->match, $this->loopString, $this->tpl);
                         }
-                       
                     }
                 }
             }
@@ -147,31 +145,42 @@ class Template {
                     /*
                      * fetch variables inside {{loop}} and {{/loop}}
                      */
-                    preg_match_all('~\{{(\w.+)\}}~', $matches[$i][1], $loopStack, PREG_SET_ORDER);
+                    preg_match_all('~\{{(\w+)|(\w+)\}}~', $matches[$i][1], $loopStack, PREG_SET_ORDER);
                     $this->match = $matches[$i][1];
                     $originalArrayName = str_replace(array('{{', '}}'), '', $loopStack[0][0]);
                     /*
                      * get the names of array variables
                      */
                     $arrayName = current(explode('.', $originalArrayName));
+                    $arrayName = implode(' ', array_unique(explode(' ', $arrayName)));
+                    $arrayName = trim($arrayName);
                     $this->loopString = null;
+
                     if (isset($this->values["$arrayName"])) {
                         if (is_array($this->values["$arrayName"])) {
+
                             foreach ($this->values["$arrayName"] as $value) {
+
                                 if (is_array($value)) {
                                     /*
                                      * this is an associative array
                                      */
                                     $valCount = preg_match_all('~\{{(\w.+)\}}~', $matches[$i][1], $loopStack, PREG_SET_ORDER);
-        
+
                                     $this->loopLine = $this->match;
+
+
                                     for ($j = 0; $j < $valCount; $j++) {
                                         /*
                                          * fetch attributes of associative array
                                          */
                                         foreach ($value as $k => $v) {
 
-                                            $this->loopLine = str_replace('{{' . $arrayName . '.' . $k . '}}', $v, $this->loopLine);
+
+                                            if (!is_array($v)) {
+
+                                                $this->loopLine = str_replace('{{' . $arrayName . '.' . $k . '}}', $v, $this->loopLine);
+                                            }
                                         }
                                     }
 
@@ -180,14 +189,15 @@ class Template {
                                     /*
                                      * this is a normal array
                                      */
-                                    
                                     $this->loopString .= str_replace('{{' . $arrayName . '}}', $value, $this->match);
                                 }
                             }
                             /*
                              * replace the variables in template file with corresponding values 
                              */
-                              $this->tpl = str_replace($this->match, $this->loopString, $this->tpl);
+                            $this->tpl = str_replace($this->match, $this->loopString, $this->tpl);
+                            // quick fix to remove unwanted loop incase of mergr array
+                            $this->tpl = str_replace($this->match, '', $this->tpl);
                         }
                     }//isset array name
                 }
@@ -203,4 +213,5 @@ class Template {
          */
         echo $this->tpl;
     }
+
 }
