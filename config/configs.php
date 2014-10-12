@@ -6,12 +6,12 @@ define('BASE_URL', 'http://localhost/violetphp/'); // must have trailing slash /
  * mysql , postgresql , sqlite
  */
 
-define('DB_TYPE', 'sqlite');
+define('DB_TYPE', 'mysql');
 define('DB_HOST', 'localhost');
 /*
  * for sqlite, specify full path/to/database/with/name
  */
-define('DB_NAME', 'testdb');
+define('DB_NAME', 'test');
 define('DB_USER', 'deepak');
 define('DB_PASS', 'password');
 /*

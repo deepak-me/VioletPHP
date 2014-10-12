@@ -1,6 +1,12 @@
 <html>
     <head>
-        
+        <style>
+            .abc
+            {
+                font-weight: bold;
+            }
+            
+        </style>    
     </head>
     <body>
 
@@ -9,24 +15,20 @@
             <input type="submit" name="submit" value="POST this"/>
         </form>
      -->       
- {{keyArray.name}}
 
-<hr/>
 
-     {{isset:dbValue2}}
-      
-   {{loop}}{{dbValue.NAME}} {{dbValue.AGE}} <br/>{{/loop}}
+
+      <b>From Database</b><br/>
+   {{loop}}
+   Name: <b>{{dbValue.first_name}}</b>  Gender: <b>{{dbValue.gender}}</b>  <br/>
+   {{/loop}}
    
+   {{loop}}
+   <a href="{{navLink}}"> {{navLink}} </a> 
+   {{/loop}}
         <hr/>
-      simple array <br/>
-      {{loop}}{{simpleArray}} {{/loop}} <br/>
-
-
-       {{/isset}}
-
-       
-      {{isset:dbValue3}}isset same line{{/isset}}
-     
+    
+    {{loop}} {{dbValue2.make}} {{/loop}}
       
        
     </body>

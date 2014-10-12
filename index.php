@@ -12,6 +12,7 @@ $router->addRoute("yes/go", "help","func2");
 //custom route with parameters
 $router->addRoute("show/result/{param}/{param}","help","myfunc");
 
+$router->addRoute("Result/Page/{param}", "dbController", "dbTest");
 //simple routing
 $router->addRoute("ok/good", "test", "f2");
 $router->addRoute("billu/barber", "help", "func2"); 

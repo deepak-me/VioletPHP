@@ -11,7 +11,7 @@ class Database {
         $dbDriverType = $dbDriverType . 'Driver';
         $file = "core/dbDrivers/" . $dbDriverType . ".php";
         if (file_exists("$file")) {
-            require $file;
+            require_once $file;
             $dbEngine = new $dbDriverType();
             $this->dbEngine = $dbEngine;
         } else {
