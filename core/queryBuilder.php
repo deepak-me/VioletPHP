@@ -16,6 +16,9 @@ class queryBuilder {
     private $set = array();
     private $updateTable;
     private $deleteTable;
+    private $offset;
+    private $count;
+    private $columnName;
 
     function __construct() {
         $this->query = "";
@@ -48,6 +51,16 @@ class queryBuilder {
         return $this;
     }
 
+    public function limitOffset($offset) {
+        $this->offset = $offset;
+        return $this;
+    }
+
+    public function limitCount($count) {
+        $this->count = $count;
+        return $this;
+    }
+
     public function insertTo($table) {
         $this->table = $table;
         return $this;
@@ -77,6 +90,11 @@ class queryBuilder {
         $this->deleteTable = $table;
         return $this;
     }
+    public function groupBy($column)
+    {
+        $this->columnName = $column;
+        return $this;
+    }
 
     public function execute() {
 
@@ -102,10 +120,22 @@ class queryBuilder {
                     $this->bindParameters[] = $or[0][2];
                 }
             }
-            if(!empty($this->limit))
-            {
-                
+
+            if (!empty($this->offset) or ! empty($this->count)) {
+                $this->query .= " LIMIT ";
             }
+            if (!empty($this->offset)) {
+                $this->query .= $this->offset.",";
+              //  $this->query .= "?, ";
+               // $this->bindParameters[] = intval($this->offset);
+            }
+            if (!empty($this->count)) {
+                $this->query .= $this->count;
+              //  $this->query .= " ? ";
+              //  $this->bindParameters[] = $this->count;
+            }
+
+           // echo "$this->query";
         }
         /*
          * insert command
@@ -178,8 +208,6 @@ class queryBuilder {
                     $this->bindParameters[] = $or[0][2];
                 }
             }
-            
-            
         }
         /*
          *  prepare query
@@ -189,13 +217,14 @@ class queryBuilder {
     }
 
     public function prepare() {
-        // print_r($this->prepare);
+         print_r($this->prepare);
 
         try {
-            $stmt = $this->connection->prepare($this->prepare);
-            $stmt->execute($this->bindParameters);
-            //  $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            //  print_r($rows);
+                $stmt = $this->connection->prepare($this->prepare);
+                $stmt->execute($this->bindParameters);
+                
+              $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+              print_r($rows);
         } catch (PDOException $e) {
             trigger_error('Wrong SQL: ' . $this->prepare . ' Error: ' . $e->getMessage(), E_USER_ERROR);
         }
@@ -208,14 +237,17 @@ $model = "kizashi";
 $newcolor = "green";
 $color = "red";
 $id = '15';
+$i = '2';
+$j = '3';        
 
 $ob = new queryBuilder();
 //$ob->select("*")->from("cars")->where("make", "=", "$make")->execute();
 //------------------------------------------------------------------
 $ob->select("id", "make", "model", "color")
         ->from("cars")
-        ->where("make", "=", "$make")
-        ->limit()
+      //  ->where("make", "=", "$make")
+    //    ->limitOffset("$i")
+        ->limitCount("$j")
 //        ->withAnd("color", "=", "$color")
 //        ->withAnd("id", ">", "$id")
         ->execute();
