@@ -98,6 +98,10 @@ class queryBuilder {
 public function having()
 {
 }
+public function orderBy($columns,$type)
+{
+}
+
 
     public function execute() {
 
