@@ -97,9 +97,11 @@ class queryBuilder {
     }
 public function having()
 {
+return $this;
 }
 public function orderBy($columns,$type)
 {
+return $this;
 }
 
 
