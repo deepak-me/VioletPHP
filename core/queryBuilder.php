@@ -95,7 +95,7 @@ class queryBuilder {
         $this->columnName = $column;
         return $this;
     }
-public function having()
+public function having($column)
 {
 return $this;
 }
