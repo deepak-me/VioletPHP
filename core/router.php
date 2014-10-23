@@ -33,6 +33,8 @@ class Router {
     private $exceptionData;
     private $exceptionCode;
     private $flag = 0;
+    private $type;
+    private $default;
 
     /*
      * creating a constructor function to load defaul contoller and method
@@ -169,8 +171,8 @@ class Router {
      * add a new custom route to the routes[] array
      */
 
-    public function addRoute($getUrl, $getController, $getMethod) {
-        $this->routes[] = array("url" => "$getUrl", "controller" => "$getController", "method" => "$getMethod");
+    public function addRoute($getUrl, $getController, $getMethod, $getType) {
+        $this->routes[] = array("url" => "$getUrl", "controller" => "$getController", "method" => "$getMethod", "type" => "$getType");
     }
 
     /*
@@ -178,10 +180,19 @@ class Router {
      */
 
     public function getRoute() {
+
+        $requestType = $_SERVER['REQUEST_METHOD'];
+
         $keys = null;
         $defaultRoute = 1;
         $match = 0;
         $found = 0;
+        if (isset($this->url[0])) {
+            $this->controller = $this->url[0];
+        }
+        if (isset($this->url[1])) {
+            $this->method = $this->url[1];
+        }
         /*
          * specify the pattern for matching
          */
@@ -191,6 +202,7 @@ class Router {
          * fetch the routes[] array for processing
          */
         foreach ($this->routes as $route) {
+
             $tempUrl = $this->url;
             foreach (array_keys(preg_grep($pattern, explode("/", $route['url']))) as $k) {
                 $tempUrl[$k] = explode("/", $route['url'])[$k];
@@ -202,6 +214,7 @@ class Router {
                 $currentRoute = implode('/', explode("/", $route['url']));
                 $currentController = $route['controller'];
                 $currentMethod = $route['method'];
+                $this->type = $route["type"];
             }
             /*
              * check for default controller
@@ -266,6 +279,7 @@ class Router {
                  * this is a default router
                  * set controller and method from url
                  */
+                $this->default = TRUE;
                 $this->haveParams = 0;
                 $keys = null;
                 if (isset($this->url[0])) {
@@ -308,29 +322,58 @@ class Router {
                 }
             }
 
-            foreach ($acceptParams as $param) {
-                if ($param == $currentRoute) {
-                    /*
-                     * match positions of parameters from route array with url
-                     */
-                    foreach (array_keys(preg_grep($pattern, explode('/', $param))) as $key) {
-                        if (isset($this->url[$key])) {
-                            $this->currentParamList[] = $this->url[$key];
+            if (isset($acceptParams)) {
+                foreach ($acceptParams as $param) {
+                    if ($param == $currentRoute) {
+                        /*
+                         * match positions of parameters from route array with url
+                         */
+                        foreach (array_keys(preg_grep($pattern, explode('/', $param))) as $key) {
+                            if (isset($this->url[$key])) {
+                                $this->currentParamList[] = $this->url[$key];
+                            }
                         }
+                        $this->controller = $currentController;
+                        $this->method = $currentMethod;
+                        $this->flag = 1;
                     }
-                    $this->controller = $currentController;
-                    $this->method = $currentMethod;
-                    $this->flag = 1;
                 }
             }
             /*
-             * basic route withour parameters
+             * basic route without parameters
              */
             if ($found == 1) {
                 $this->controller = $basicController;
                 $this->method = $basicMethod;
             }
         }
+
+
+        /*
+         * check RESTFUL routing
+         */
+
+        $typeArray = explode(',', $this->type);
+        if (count($typeArray) > 1) {
+            $passed = FALSE;
+            foreach ($typeArray as $type) {
+                if (strtoupper($type) == $requestType) {
+                    $passed = TRUE;
+                    break;
+                }
+            }
+            if ($passed == FALSE) {
+                exit(0);
+            }
+        } else {
+            if (!(strtoupper($this->type) == $requestType or strtoupper($this->type) == "ANY")) {
+                if (!$this->default) {
+                    exit(0);
+                }
+            }
+        }
+
+
         /*
          * call getParameters method to fetch parameters
          */
