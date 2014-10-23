@@ -25,6 +25,12 @@ class Test extends Controller {
         echo "message from f2()";
     }
 
+    public function rest() {
+        $response["name"]="kumaran";
+        $response["email"] = "kumaran.99@gmail.com";
+        echo json_encode($response);
+    }
+
     public function threeargs($first, $second, $third) {
         echo "inside threeargs() <br/>";
         echo "First parameter:- $first <br/>";

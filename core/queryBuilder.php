@@ -95,15 +95,6 @@ class queryBuilder {
         $this->columnName = $column;
         return $this;
     }
-public function having($column,$cname)
-{
-return $this;
-}
-public function orderBy($columns,$type)
-{
-return $this;
-}
-
 
     public function execute() {
 
