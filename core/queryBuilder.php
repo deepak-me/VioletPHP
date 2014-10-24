@@ -17,8 +17,19 @@ class queryBuilder {
     private $updateTable;
     private $deleteTable;
     private $offset;
-    private $count;
+    private $limitCount;
     private $columnName;
+    private $orderColumnName;
+    private $havingSum = array();
+    private $havingCount = array();
+    private $havingMin = array();
+    private $havingMax = array();
+    private $havingAvg = array();
+    private $count;
+    private $min;
+    private $max;
+    private $sum;
+    private $avg;
 
     function __construct() {
         $this->query = "";
@@ -57,7 +68,7 @@ class queryBuilder {
     }
 
     public function limitCount($count) {
-        $this->count = $count;
+        $this->limitCount = $count;
         return $this;
     }
 
@@ -90,9 +101,69 @@ class queryBuilder {
         $this->deleteTable = $table;
         return $this;
     }
-    public function groupBy($column)
-    {
+
+    public function groupBy($column) {
         $this->columnName = $column;
+        return $this;
+    }
+
+    public function orderByAsc($column) {
+        $this->orderColumnName = $column . " ASC ";
+        return $this;
+    }
+
+    public function orderByDesc($column) {
+        $this->orderColumnName = $column . " DESC ";
+        return $this;
+    }
+
+    public function havingSum($column) {
+        $this->havingSum = &func_get_args();
+        return $this;
+    }
+
+    public function havingCount($column) {
+        $this->havingCount = &func_get_args();
+        return $this;
+    }
+
+    public function havingMin($column) {
+        $this->havingMin = &func_get_args();
+        return $this;
+    }
+
+    public function havingMax($column) {
+        $this->havingMax = &func_get_args();
+        return $this;
+    }
+
+    public function havingAvg($column) {
+        $this->havingAvg = &func_get_args();
+        return $this;
+    }
+
+    public function count($column) {
+        $this->count = $column;
+        return $this;
+    }
+
+    public function sum($column) {
+        $this->sum = $column;
+        return $this;
+    }
+
+    public function min($column) {
+        $this->min = $column;
+        return $this;
+    }
+
+    public function max($column) {
+        $this->max = $column;
+        return $this;
+    }
+
+    public function avg($column) {
+        $this->avg = $column;
         return $this;
     }
 
@@ -121,21 +192,49 @@ class queryBuilder {
                 }
             }
 
-            if (!empty($this->offset) or ! empty($this->count)) {
+            if (!empty($this->offset) or ! empty($this->limitCount)) {
                 $this->query .= " LIMIT ";
             }
             if (!empty($this->offset)) {
-                $this->query .= $this->offset.",";
-              //  $this->query .= "?, ";
-               // $this->bindParameters[] = intval($this->offset);
+                $this->query .= $this->offset . ",";
+                //  $this->query .= "?, ";
+                // $this->bindParameters[] = intval($this->offset);
             }
-            if (!empty($this->count)) {
-                $this->query .= $this->count;
-              //  $this->query .= " ? ";
-              //  $this->bindParameters[] = $this->count;
+            if (!empty($this->limitCount)) {
+                $this->query .= $this->limitCount;
+                //  $this->query .= " ? ";
+                //  $this->bindParameters[] = $this->count;
+            }
+            if (!empty($this->columnName)) {
+                $this->query .= " GROUP BY " . $this->columnName;
+            }
+            if (!empty($this->havingSum)) {
+                $this->query .= " HAVING SUM(" . $this->havingSum[0] . ") " . $this->havingSum[1] . " " . "?";
+                $this->bindParameters[] = $this->havingSum[2];
+            }
+            if (!empty($this->havingCount)) {
+                $this->query .= " HAVING COUNT(" . $this->havingCount[0] . ") " . $this->havingCount[1] . " " . "?";
+                $this->bindParameters[] = $this->havingCount[2];
+            }
+            if (!empty($this->havingMin)) {
+                $this->query .= " HAVING MIN(" . $this->havingMin[0] . ") " . $this->havingMin[1] . " " . "?";
+                $this->bindParameters[] = $this->havingMin[2];
+            }
+            if (!empty($this->havingMax)) {
+                $this->query .= " HAVING MAX(" . $this->havingMax[0] . ") " . $this->havingMax[1] . " " . "?";
+                $this->bindParameters[] = $this->havingMax[2];
+            }
+            if (!empty($this->havingAvg)) {
+                $this->query .= " HAVING AVG(" . $this->havingAvg[0] . ") " . $this->havingAvg[1] . " " . "?";
+                $this->bindParameters[] = $this->havingAvg[2];
             }
 
-           // echo "$this->query";
+            if (!empty($this->orderColumnName)) {
+                $this->query .= " ORDER BY " . $this->orderColumnName;
+            }
+
+
+            // echo "$this->query";
         }
         /*
          * insert command
@@ -217,14 +316,14 @@ class queryBuilder {
     }
 
     public function prepare() {
-         print_r($this->prepare);
-
+        print_r($this->prepare);
+        echo '<hr/>';
         try {
-                $stmt = $this->connection->prepare($this->prepare);
-                $stmt->execute($this->bindParameters);
-                
-              $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-              print_r($rows);
+            $stmt = $this->connection->prepare($this->prepare);
+            $stmt->execute($this->bindParameters);
+
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            print_r($rows);
         } catch (PDOException $e) {
             trigger_error('Wrong SQL: ' . $this->prepare . ' Error: ' . $e->getMessage(), E_USER_ERROR);
         }
@@ -236,20 +335,25 @@ $make = "suzuki";
 $model = "kizashi";
 $newcolor = "green";
 $color = "red";
-$id = '15';
+$id = '12';
 $i = '2';
-$j = '3';        
+$j = '3';
 
 $ob = new queryBuilder();
 //$ob->select("*")->from("cars")->where("make", "=", "$make")->execute();
 //------------------------------------------------------------------
-$ob->select("id", "make", "model", "color")
-        ->from("cars")
-      //  ->where("make", "=", "$make")
-    //    ->limitOffset("$i")
-        ->limitCount("$j")
+//$ob->select("id", "make", "model", "color")
+//$ob->select("*")
+  $ob->select(count($column))      
+        ->from("customers")
+        //  ->where("id", "<", "$id")
+        //    ->limitOffset("$i")
+        //    ->limitCount("$j")
 //        ->withAnd("color", "=", "$color")
 //        ->withAnd("id", ">", "$id")
+        ->groupBy("age")
+        //       ->orderByAsc("model")
+        ->havingCount("age", ">=", "2")
         ->execute();
 //---------------------------------------------------------------
 //$ob->insertTo("cars")
